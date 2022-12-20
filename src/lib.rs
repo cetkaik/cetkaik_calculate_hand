@@ -17,10 +17,10 @@ mod tests {
         let data: Vec<(Vec<String>, AnswerInJson)> = serde_json::from_str(test_cases).unwrap();
 
         for (pieces, expected_answer) in data {
-            let pieces: Vec<NonTam2Piece> = pieces
+            let pieces: Vec<ColorAndProf> = pieces
                 .iter()
                 .map(|p| p[..].try_into().unwrap())
-                .collect::<Vec<NonTam2Piece>>();
+                .collect::<Vec<ColorAndProf>>();
 
             let answer = calculate_hands_and_score_from_pieces(&pieces);
 
@@ -65,7 +65,7 @@ impl alloc::fmt::Display for PositiveHand {
     }
 }
 
-use cetkaik_core::absolute::NonTam2Piece;
+use cetkaik_core::ColorAndProf;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub enum PositiveHand {
@@ -139,13 +139,13 @@ impl PositiveHand {
 
 use hashbrown::HashSet;
 
-type PieceNumMap = multiset::HashMultiSet<NonTam2Piece>;
+type PieceNumMap = multiset::HashMultiSet<ColorAndProf>;
 
 fn has(count: &PieceNumMap, prof: ObtainableProf) -> bool {
-    count.count_of(&NonTam2Piece {
+    count.count_of(&ColorAndProf {
         prof,
         color: Color::Kok1,
-    }) + count.count_of(&NonTam2Piece {
+    }) + count.count_of(&ColorAndProf {
         prof,
         color: Color::Huok2,
     }) > 0
@@ -157,12 +157,12 @@ fn has_all(count: &PieceNumMap, profs: &[ObtainableProf]) -> bool {
 
 fn has_all_same_color(count: &PieceNumMap, profs: &[ObtainableProf]) -> bool {
     profs.iter().all(|a| {
-        count.count_of(&NonTam2Piece {
+        count.count_of(&ColorAndProf {
             prof: *a,
             color: Color::Kok1,
         }) >= 1
     }) || profs.iter().all(|a| {
-        count.count_of(&NonTam2Piece {
+        count.count_of(&ColorAndProf {
             prof: *a,
             color: Color::Huok2,
         }) >= 1
@@ -170,10 +170,10 @@ fn has_all_same_color(count: &PieceNumMap, profs: &[ObtainableProf]) -> bool {
 }
 
 fn howmany(count: &PieceNumMap, prof: ObtainableProf) -> usize {
-    count.count_of(&NonTam2Piece {
+    count.count_of(&ColorAndProf {
         prof,
         color: Color::Kok1,
-    }) + count.count_of(&NonTam2Piece {
+    }) + count.count_of(&ColorAndProf {
         prof,
         color: Color::Huok2,
     })
@@ -353,29 +353,29 @@ fn h(ans: &mut HashSet<PositiveHand>, c: &PieceNumMap, color: Color) {
         Profession::Nuak1,
     ];
 
-    if count.count_of(&NonTam2Piece {
+    if count.count_of(&ColorAndProf {
         prof: Profession::Io,
         color,
     }) == 1
     {
-        count.remove(&NonTam2Piece {
+        count.remove(&ColorAndProf {
             prof: Profession::Io,
             color,
         });
         for prof_except_king in prof_list_excluding_king {
-            count.insert(NonTam2Piece {
+            count.insert(ColorAndProf {
                 prof: prof_except_king,
                 color,
             }); // wildcard
             for p in calculate_hands_(&count) {
                 ans.insert(p);
             }
-            count.remove(&NonTam2Piece {
+            count.remove(&ColorAndProf {
                 prof: prof_except_king,
                 color,
             });
         }
-        count.insert(NonTam2Piece {
+        count.insert(ColorAndProf {
             prof: Profession::Io,
             color,
         });
@@ -383,11 +383,11 @@ fn h(ans: &mut HashSet<PositiveHand>, c: &PieceNumMap, color: Color) {
 }
 
 fn calculate_hands_(count: &PieceNumMap) -> HashSet<PositiveHand> {
-    if count.count_of(&NonTam2Piece {
+    if count.count_of(&ColorAndProf {
         prof: Profession::Io,
         color: Color::Huok2,
     }) == 0
-        && count.count_of(&NonTam2Piece {
+        && count.count_of(&ColorAndProf {
             prof: Profession::Io,
             color: Color::Kok1,
         }) == 0
@@ -413,10 +413,10 @@ const fn upper_limit(prof: Profession) -> usize {
     }
 }
 
-fn calculate_hands_from_pieces(pieces: &[NonTam2Piece]) -> Result<Vec<PositiveHand>, TooMany> {
+fn calculate_hands_from_pieces(pieces: &[ColorAndProf]) -> Result<Vec<PositiveHand>, TooMany> {
     let mut count: PieceNumMap = multiset::HashMultiSet::new();
     for p in pieces {
-        count.insert(NonTam2Piece {
+        count.insert(ColorAndProf {
             prof: p.prof,
             color: p.color,
         });
@@ -438,7 +438,7 @@ fn calculate_hands_from_pieces(pieces: &[NonTam2Piece]) -> Result<Vec<PositiveHa
             Profession::Io,
             Profession::Nuak1,
         ] {
-            let p = NonTam2Piece {
+            let p = ColorAndProf {
                 prof: *prof,
                 color: *color,
             };
@@ -456,7 +456,7 @@ fn calculate_hands_from_pieces(pieces: &[NonTam2Piece]) -> Result<Vec<PositiveHa
 
 /// # Errors
 /// Fails when the input is impossible (e.g. there are three or more Io)
-pub fn calculate_hands_and_score_from_pieces(ps: &[NonTam2Piece]) -> Answer {
+pub fn calculate_hands_and_score_from_pieces(ps: &[ColorAndProf]) -> Answer {
     match calculate_hands_from_pieces(ps) {
         Err(TooMany(too_many_list)) => Err(TooMany(too_many_list)),
         Ok(hands) => Ok(ScoreAndHands {
