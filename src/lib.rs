@@ -24,16 +24,16 @@ mod tests {
 
             let answer = calculate_hands_and_score_from_pieces(&pieces);
 
-            assert_eq!(answer, expected_answer.try_into())
+            assert_eq!(answer, expected_answer.try_into());
         }
     }
 }
 
 use serde::{Deserialize, Serialize};
 
-type ObtainableProf = cetkaik_core::Profession;
+type ObtainableProf = cetkaik_fundamental::Profession;
 
-use cetkaik_core::{Color, Profession};
+use cetkaik_fundamental::{Color, Profession};
 
 impl alloc::fmt::Display for PositiveHand {
     fn fmt(&self, f: &mut alloc::fmt::Formatter<'_>) -> alloc::fmt::Result {
@@ -65,7 +65,7 @@ impl alloc::fmt::Display for PositiveHand {
     }
 }
 
-use cetkaik_core::ColorAndProf;
+use cetkaik_fundamental::ColorAndProf;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub enum PositiveHand {
@@ -179,7 +179,7 @@ fn howmany(count: &PieceNumMap, prof: ObtainableProf) -> usize {
     })
 }
 
-use cetkaik_core::{color, cp, prof};
+use cetkaik_fundamental::{color, cp, prof};
 
 fn calculate_hands_with_no_king(count: &PieceNumMap) -> HashSet<PositiveHand> {
     let mut ans: HashSet<PositiveHand> = HashSet::new();
